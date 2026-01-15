@@ -66,11 +66,11 @@ var Body = /** @class */ (function () {
         this.force = new Vector();
         this.restitution = restitution;
         this.shape = shape;
-        this.radius = 10;
         this.width = width;
         this.height = height;
         this.color = color;
         this.isStatic = false;
+        this.radius = 10;
     }
     Body.prototype.applyForce = function (force) {
         this.force.add(force);
@@ -85,12 +85,12 @@ var Body = /** @class */ (function () {
     };
     Body.prototype.draw = function (ctx) {
         ctx.fillStyle = this.color;
-        if (this.shape === "circle") {
+        if (this.shape === 'circle') {
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
             ctx.fill();
         }
-        else if (this.shape === "square") {
+        else if (this.shape === 'square') {
             ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
         }
     };
@@ -98,7 +98,7 @@ var Body = /** @class */ (function () {
 }());
 var PhysicsWorld = /** @class */ (function () {
     function PhysicsWorld(canvas, gravity) {
-        if (gravity === void 0) { gravity = new Vector(0, 0); }
+        if (gravity === void 0) { gravity = new Vector(); }
         this.canvas = canvas;
         this.gravity = gravity;
         this.bodies = [];
@@ -107,7 +107,7 @@ var PhysicsWorld = /** @class */ (function () {
         this.bodies.push(body);
     };
     PhysicsWorld.prototype.clearBricks = function () {
-        this.bodies = this.bodies.filter(function (body) { return body.type !== "brick"; });
+        this.bodies = this.bodies.filter(function (body) { return body.type !== 'brick'; });
     };
     PhysicsWorld.prototype.update = function (dt) {
         for (var _i = 0, _a = this.bodies; _i < _a.length; _i++) {
@@ -123,17 +123,14 @@ var PhysicsWorld = /** @class */ (function () {
             var body = _a[_i];
             if (body.isStatic)
                 continue;
-            // Top Wall
             if (body.position.y - body.radius <= 0) {
                 body.position.y = body.radius;
                 body.velocity.y *= -body.restitution;
             }
-            // Left Wall
             if (body.position.x - body.radius <= 0) {
                 body.position.x = body.radius;
                 body.velocity.x *= -body.restitution;
             }
-            // Right Wall
             if (body.position.x + body.radius >= this.canvas.width) {
                 body.position.x = this.canvas.width - body.radius;
                 body.velocity.x *= -body.restitution;
@@ -151,12 +148,12 @@ var PhysicsWorld = /** @class */ (function () {
             x: paddle.position.x - paddle.width / 2,
             y: paddle.position.y - paddle.height / 2,
             width: paddle.width,
-            height: paddle.height,
+            height: paddle.height
         };
         var ballCircle = {
             x: ball.position.x,
             y: ball.position.y,
-            radius: ball.radius,
+            radius: ball.radius
         };
         var collision = this.checkCircleRectCollision(ballCircle, paddleRect);
         if (collision.hit) {
@@ -170,8 +167,8 @@ var PhysicsWorld = /** @class */ (function () {
         for (var i = bricks.length - 1; i >= 0; i--) {
             var brick = bricks[i];
             var brickRect = {
-                x: brick.position.x - brick.width / 2,
-                y: brick.position.y - brick.height / 2,
+                x: brick.position.x,
+                y: brick.position.y,
                 width: brick.width,
                 height: brick.height,
             };
@@ -184,21 +181,21 @@ var PhysicsWorld = /** @class */ (function () {
                     ball.velocity.sub(normal.scale(2 * velocityAlongNormal * ball.restitution));
                 }
                 score += 10;
-                document.getElementById("scoreDisplay").textContent = "Score: ".concat(score);
+                document.getElementById("scoreDisplay").textContent = "Score ".concat(score);
                 this.bodies.splice(this.bodies.indexOf(brick), 1);
                 break;
             }
         }
     };
-    PhysicsWorld.prototype.checkCircleRectCollision = function (circle, rect) {
-        var closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
-        var closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
-        var dx = circle.x - closestX;
-        var dy = circle.y - closestY;
+    PhysicsWorld.prototype.checkCircleRectCollision = function (ballCircle, paddleRect) {
+        var closestX = Math.max(paddleRect.x, Math.min(ballCircle.x, paddleRect.x + paddleRect.width));
+        var closestY = Math.max(paddleRect.y, Math.min(ballCircle.y, paddleRect.y + paddleRect.height));
+        var dx = ballCircle.x - closestX;
+        var dy = ballCircle.y - closestY;
         var distanceSq = Math.pow(dx, 2) + Math.pow(dy, 2);
-        var hit = distanceSq <= circle.radius * circle.radius;
+        var hit = distanceSq <= Math.pow(ballCircle.radius, 2);
         if (hit) {
-            var normal = new Vector(circle.x - closestX, circle.y - closestY).normalize();
+            var normal = new Vector(ballCircle.x - closestX, ballCircle.y - closestY).normalize();
             return { hit: true, normal: normal };
         }
         return { hit: false };
@@ -206,7 +203,7 @@ var PhysicsWorld = /** @class */ (function () {
     return PhysicsWorld;
 }());
 var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
+var ctx = canvas.getContext('2d');
 var gameMessageElement = document.getElementById("gameMessage");
 var gameRunning = false;
 var gameOver = false;
@@ -216,8 +213,8 @@ var currentLevel = 1;
 var maxLevels = 3;
 var isLevelTransitioning = false;
 function resizeCanvas() {
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = window.innerHeight * 0.9;
+    canvas.height = window.innerHeight * .9;
+    canvas.width = window.innerWidth * .9;
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
@@ -242,7 +239,7 @@ function createBricks(level) {
         "#673ab7",
         "#3f51b5",
         "#2196f3",
-        "#03a9f4",
+        "#03a9f4"
     ];
     var layout;
     switch (level) {
@@ -251,13 +248,13 @@ function createBricks(level) {
                 [1, 1, 1, 1],
                 [1, 1, 1, 1],
                 [1, 1, 1, 1],
-                [1, 1, 1, 1],
+                [1, 1, 1, 1]
             ];
             break;
         default:
             layout = [
-                [1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
             ];
     }
     var numCols = layout[0].length;
@@ -278,10 +275,9 @@ function startLevel() {
     world.clearBricks();
     createBricks(currentLevel);
     ball.position = new Vector(canvas.width / 2, canvas.height - 50);
-    ball.velocity = new Vector(0, 0);
+    ball.velocity = new Vector();
     paddle.position = new Vector(canvas.width / 2, canvas.height - 20);
     gameRunning = false;
-    launchRequested = false;
     isLevelTransitioning = false;
     document.getElementById("levelDisplay").textContent = "Level: ".concat(currentLevel);
     gameMessageElement.style.display = "none";
@@ -289,7 +285,7 @@ function startLevel() {
 function resetGame() {
     score = 0;
     currentLevel = 1;
-    document.getElementById("scoreDisplay").textContent = "Score: ".concat(score);
+    document.getElementById("scoreDisplay").textContent = "Score ".concat(score);
     world.bodies = [];
     world.addBody(ball);
     world.addBody(paddle);
@@ -315,7 +311,7 @@ canvas.addEventListener("mousemove", function (e) {
 function checkWinLoss() {
     if (isLevelTransitioning)
         return;
-    var bricksRemaining = world.bodies.filter(function (b) { return b.type === "brick"; }).length;
+    var bricksRemaining = world.bodies.filter(function (ball) { return ball.type === "brick"; }).length;
     if (bricksRemaining === 0) {
         if (currentLevel < maxLevels) {
             isLevelTransitioning = true;
